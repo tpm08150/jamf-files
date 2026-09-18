@@ -279,6 +279,27 @@ const views = ["viewLoading", "viewSignedOut", "viewAllowed", "viewDenied", "vie
 function show(id) {
   views.forEach((v) => { $(v).hidden = v !== id; });
 }
+/** What went wrong, in words, with the fix where there is one. */
+function explain(err) {
+  const code = (err && err.code) || String(err);
+  switch (code) {
+    case "auth/unauthorized-domain":
+      return (
+        `This page's address (${location.hostname}) has not been allowed in Firebase yet, ` +
+        "so Google refuses before it even asks which account. Somebody with Firebase access " +
+        "needs to add it under Authentication → Settings → Authorized domains."
+      );
+    case "auth/operation-not-allowed":
+      return "Google sign-in is not switched on for this Firebase project.";
+    case "auth/network-request-failed":
+      return "Couldn't reach Google. Check this machine's connection and try again.";
+    case "auth/internal-error":
+      return `Google returned an error with no explanation (${code}). Worth trying once more.`;
+    default:
+      return code;
+  }
+}
+
 function fail(title, body) {
   $("errorTitle").textContent = title;
   $("errorBody").textContent = body;
@@ -317,7 +338,11 @@ $("signInBtn").addEventListener("click", async () => {
     } else if (err && (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request")) {
       show("viewSignedOut");
     } else {
-      fail("Sign-in failed", (err && err.code) || String(err));
+      // ⚠️ Never hand somebody a raw Firebase code. `auth/unauthorized-domain`
+      // reads as "sign-in is broken" when it means "one line of setup is
+      // missing", and it fails BEFORE the account picker opens — so it looks
+      // like the app rejected you rather than never having asked.
+      fail("Sign-in failed", explain(err));
     }
   }
 });
