@@ -19,6 +19,7 @@ Everything else is optional and only changes what the page prints:
     --name        heading, e.g. "JAMF 2026"
     --folder      subheading, e.g. "Presentation Management"
     --path        the footer line
+    --app         download URL for the Mac app, shown to signed-in people only
 
 Run with no flags to print what is stored now.
 """
@@ -48,12 +49,17 @@ def main():
     ap.add_argument("--name")
     ap.add_argument("--folder")
     ap.add_argument("--path")
+    # ⚠️ The Mac app's download URL belongs here for the same reason the share
+    # link does: the app has the share link baked into it, so a public link to
+    # the app is a public link to the folder. The page hands it out only after
+    # sign-in.
+    ap.add_argument("--app", help="download URL for the Mac app (a GitHub release asset)")
     args = ap.parse_args()
 
     s = session()
     doc = f"{BASE}/eventLinks/{args.event_id}"
 
-    if not (args.url or args.name or args.folder or args.path):
+    if not (args.url or args.name or args.folder or args.path or args.app):
         r = s.get(doc)
         if r.status_code == 404:
             print(f"eventLinks/{args.event_id}: does not exist")
@@ -68,6 +74,7 @@ def main():
         ("eventName", args.name),
         ("folderName", args.folder),
         ("folderPath", args.path),
+        ("appUrl", args.app),
     ]
     fields = {k: {"stringValue": v} for k, v in pairs if v is not None}
 

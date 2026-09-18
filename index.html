@@ -180,6 +180,28 @@
       <p class="hint">Opens FileCloud in this window. No second sign-in there.</p>
     </div>
 
+    <div class="card" id="appCard" hidden>
+      <a class="btn" id="appBtn" href="#" download>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+        </svg>
+        Download the Mac app
+      </a>
+      <p class="hint">Keeps a folder on this machine matching the event's, and tells you when a file changes. Apple Silicon Macs.</p>
+      <details>
+        <summary>First launch on a machine that downloaded it</summary>
+        <div class="body">
+          <p style="margin:0 0 10px">macOS quarantines anything that arrives by download, and this app is not signed with a paid Apple certificate — so the first launch needs one extra step, once per machine:</p>
+          <ol>
+            <li>Unzip it and drag <b>Event Files</b> to <code>Applications</code>.</li>
+            <li>Open it. macOS refuses.</li>
+            <li><code>System Settings</code> → <code>Privacy &amp; Security</code> → scroll down → <b>Open Anyway</b>.</li>
+          </ol>
+          <p style="margin:10px 0 0">A copy handed over on a <b>flash drive</b> skips all of that — it just opens.</p>
+        </div>
+      </details>
+    </div>
+
     <div class="card">
       <div class="row">
         <button class="ghost" id="copyBtn">Copy this page's link</button>
@@ -352,6 +374,17 @@ onAuthStateChanged(auth, async (user) => {
   if (data.folderPath) $("footer").textContent = "FileCloud · " + data.folderPath;
 
   $("openBtn").href = shareUrl;
+
+  // The Mac app carries the share link inside it, so its download link is as
+  // sensitive as the share link and lives in the same document — never in this
+  // repo. No appUrl simply means no app has been published yet.
+  if (data.appUrl) {
+    $("appBtn").href = data.appUrl;
+    $("appCard").hidden = false;
+  } else {
+    $("appCard").hidden = true;
+  }
+
   show("viewAllowed");
   maybeAutoOpen();
 });
