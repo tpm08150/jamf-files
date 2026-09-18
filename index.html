@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>JAMF 2026 — Event Files</title>
-<meta name="description" content="One link to the shared presentation folder for the event.">
+<title>Event Files</title>
+<meta name="description" content="Sign in to reach the shared event folder.">
 <meta name="theme-color" content="#0e1116">
+<meta name="robots" content="noindex, nofollow">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png" sizes="192x192">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -19,6 +20,7 @@
     --muted:#9aa5b4;
     --accent:#4da3ff;
     --accent-ink:#04121f;
+    --warn:#d09a3c;
     --radius:16px;
   }
   *{box-sizing:border-box}
@@ -37,10 +39,7 @@
   .wrap{width:100%;max-width:560px}
 
   header{text-align:center;margin-bottom:28px}
-  .kicker{
-    font-size:12px;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--muted);margin:0 0 8px
-  }
+  .kicker{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
   h1{font-size:clamp(28px,7vw,40px);line-height:1.1;margin:0 0 6px;letter-spacing:-.02em}
   .sub{color:var(--muted);margin:0;font-size:15px}
 
@@ -51,19 +50,22 @@
     padding:22px;
     margin-bottom:14px;
   }
+  .card.center{text-align:center}
 
-  a.open{
-    display:flex;align-items:center;justify-content:center;gap:10px;
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:10px;width:100%;
     background:var(--accent);color:var(--accent-ink);
-    text-decoration:none;font-weight:650;font-size:19px;
-    padding:20px 24px;border-radius:14px;
+    text-decoration:none;font-family:inherit;font-weight:650;font-size:19px;
+    padding:20px 24px;border:0;border-radius:14px;cursor:pointer;
     transition:filter .15s ease, transform .05s ease;
   }
-  a.open:hover{filter:brightness(1.08)}
-  a.open:active{transform:translateY(1px)}
-  a.open svg{flex:none}
+  .btn:hover{filter:brightness(1.08)}
+  .btn:active{transform:translateY(1px)}
+  .btn[disabled]{opacity:.55;cursor:default}
+  .btn svg{flex:none}
 
   .hint{color:var(--muted);font-size:13px;text-align:center;margin:14px 0 0}
+  .hint.warn{color:var(--warn)}
 
   .row{display:flex;gap:10px;flex-wrap:wrap}
   button.ghost{
@@ -76,16 +78,11 @@
   button.ghost:hover{background:#242b36}
 
   .qr{display:flex;gap:18px;align-items:center}
-  .qr img{
-    width:112px;height:112px;flex:none;
-    background:#fff;border-radius:10px;padding:8px;
-  }
+  .qr img{width:112px;height:112px;flex:none;background:#fff;border-radius:10px;padding:8px}
   .qr p{margin:0;color:var(--muted);font-size:14px}
   .qr strong{color:var(--text);display:block;font-size:15px;margin-bottom:4px;font-weight:600}
 
-  label.toggle{
-    display:flex;align-items:flex-start;gap:12px;cursor:pointer;
-  }
+  label.toggle{display:flex;align-items:flex-start;gap:12px;cursor:pointer}
   label.toggle input{margin:3px 0 0;width:18px;height:18px;accent-color:var(--accent);flex:none}
   label.toggle span{font-size:14px;color:var(--muted)}
   label.toggle span b{color:var(--text);display:block;font-weight:600;font-size:15px}
@@ -99,21 +96,27 @@
   details .body{color:var(--muted);font-size:14px;padding:12px 0 2px}
   details .body ol{margin:0;padding-left:20px}
   details .body li{margin-bottom:6px}
-  details .body code{
-    background:var(--panel-2);border:1px solid var(--line);
-    padding:1px 6px;border-radius:6px;font-size:12.5px;
-  }
+  details .body code{background:var(--panel-2);border:1px solid var(--line);padding:1px 6px;border-radius:6px;font-size:12.5px}
 
-  input[type=url]{
-    width:100%;background:var(--bg);color:var(--text);
-    border:1px solid var(--line);border-radius:10px;
-    padding:11px 12px;font:inherit;font-size:14px;margin-bottom:10px;
+  .who{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    color:var(--muted);font-size:13px;
   }
+  .who button{
+    background:none;border:0;color:var(--accent);font:inherit;font-size:13px;
+    cursor:pointer;padding:4px;text-decoration:underline;
+  }
+  .who .email{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-  footer{
-    color:#68727f;font-size:12px;text-align:center;
-    margin-top:22px;line-height:1.6;word-break:break-word;
+  footer{color:#68727f;font-size:12px;text-align:center;margin-top:22px;line-height:1.6;word-break:break-word}
+
+  .spinner{
+    width:34px;height:34px;border-radius:50%;margin:0 auto 14px;
+    border:3px solid var(--line);border-top-color:var(--accent);
+    animation:spin .8s linear infinite;
   }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.spinner{animation:none}}
 
   #banner{
     position:fixed;inset:0;display:none;
@@ -123,175 +126,289 @@
   }
   #banner.on{display:flex}
   #banner p{margin:0;color:var(--muted)}
-  .spinner{
-    width:34px;height:34px;border-radius:50%;
-    border:3px solid var(--line);border-top-color:var(--accent);
-    animation:spin .8s linear infinite;
-  }
-  @keyframes spin{to{transform:rotate(360deg)}}
-  @media (prefers-reduced-motion:reduce){.spinner{animation:none}}
+  [hidden]{display:none !important}
 </style>
 </head>
 <body>
 
 <div id="banner">
-  <div class="spinner"></div>
-  <p>Opening the shared folder…</p>
+  <div>
+    <div class="spinner"></div>
+    <p>Opening the shared folder…</p>
+  </div>
   <button class="ghost" id="cancelAuto" style="flex:0 0 auto">Stay on this page</button>
 </div>
 
 <div class="wrap">
   <header>
-    <p class="kicker" id="kicker">Event Files</p>
-    <h1 id="eventName">JAMF 2026</h1>
-    <p class="sub" id="folderName">Presentation Management</p>
+    <p class="kicker">Event Files</p>
+    <h1 id="eventName">Event Files</h1>
+    <p class="sub" id="folderName">Harvest / HMX</p>
   </header>
 
-  <div class="card">
-    <a class="open" id="openBtn" href="#">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-      </svg>
-      Open the shared folder
-    </a>
-    <p class="hint">Opens FileCloud in this window. Sign-in is not required.</p>
-  </div>
+  <!-- 1. still working out who you are -->
+  <section id="viewLoading" class="card center">
+    <div class="spinner"></div>
+    <p class="hint" style="margin:0">Checking your sign-in…</p>
+  </section>
 
-  <div class="card">
-    <div class="row">
-      <button class="ghost" id="copyBtn">Copy this page's link</button>
-      <button class="ghost" id="copyShareBtn">Copy the FileCloud link</button>
+  <!-- 2. signed out -->
+  <section id="viewSignedOut" hidden>
+    <div class="card">
+      <button class="btn" id="signInBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8z"/>
+          <path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.9-3c-1.1.7-2.4 1.1-4 1.1-3.1 0-5.7-2.1-6.6-4.9H1.4v3.1A12 12 0 0 0 12 24z"/>
+          <path fill="#FBBC05" d="M5.4 14.3a7.2 7.2 0 0 1 0-4.6V6.6H1.4a12 12 0 0 0 0 10.8l4-3.1z"/>
+          <path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4C17.9 1.2 15.2 0 12 0A12 12 0 0 0 1.4 6.6l4 3.1C6.3 6.9 8.9 4.8 12 4.8z"/>
+        </svg>
+        Sign in with Google
+      </button>
+      <p class="hint">Use your Harvest / HMX account — the same one as the Hub.</p>
     </div>
-  </div>
+  </section>
 
-  <div class="card qr" id="qrCard" hidden>
-    <img id="qrImg" src="qr.svg" alt="QR code linking to this page">
-    <p><strong>Phones and tablets</strong>Scan to land on this same page.</p>
-  </div>
+  <!-- 3. signed in and allowed -->
+  <section id="viewAllowed" hidden>
+    <div class="card">
+      <a class="btn" id="openBtn" href="#">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        </svg>
+        Open the shared folder
+      </a>
+      <p class="hint">Opens FileCloud in this window. No second sign-in there.</p>
+    </div>
 
-  <div class="card">
-    <label class="toggle">
-      <input type="checkbox" id="autoOpen">
-      <span><b>Skip this page on this machine</b>Next time, go straight to the folder. You get a moment to cancel. Stored per-device — set it on the machines you want it on.</span>
-    </label>
-  </div>
+    <div class="card">
+      <div class="row">
+        <button class="ghost" id="copyBtn">Copy this page's link</button>
+        <button class="ghost" id="copyShareBtn">Copy the FileCloud link</button>
+      </div>
+    </div>
 
-  <div class="card">
+    <div class="card qr" id="qrCard" hidden>
+      <img id="qrImg" src="qr.svg" alt="QR code linking to this page">
+      <p><strong>Phones and tablets</strong>Scan to land on this same page. They sign in too.</p>
+    </div>
+
+    <div class="card">
+      <label class="toggle">
+        <input type="checkbox" id="autoOpen">
+        <span><b>Skip this page on this machine</b>Once signed in, go straight to the folder next time. You get a moment to cancel. Stored per-device.</span>
+      </label>
+    </div>
+  </section>
+
+  <!-- 4. signed in, not allowed -->
+  <section id="viewDenied" hidden>
+    <div class="card center">
+      <p style="margin:0 0 6px;font-weight:600;font-size:17px">This account isn't on the list</p>
+      <p class="hint" style="margin:0">Signed in as <span id="deniedEmail"></span>. Either it's the wrong Google account, or someone needs to add you to the Hub's allowlist.</p>
+    </div>
+  </section>
+
+  <!-- 5. something broke -->
+  <section id="viewError" hidden>
+    <div class="card center">
+      <p style="margin:0 0 6px;font-weight:600;font-size:17px" id="errorTitle">Couldn't load the link</p>
+      <p class="hint" style="margin:0" id="errorBody"></p>
+    </div>
+  </section>
+
+  <div class="card" id="installCard">
     <details>
       <summary>Install as a desktop app</summary>
       <div class="body">
         <ol>
-          <li><b>Chrome / Edge:</b> open this page → the install icon at the right of the address bar (or menu → <code>Cast, save and share</code> → <code>Install page as app</code>) → <b>Install</b>. You get a dock/taskbar icon that opens in its own window.</li>
+          <li><b>Chrome / Edge:</b> the install icon at the right of the address bar (or menu → <code>Cast, save and share</code> → <code>Install page as app</code>) → <b>Install</b>. You get a dock/taskbar icon that opens in its own window, still signed in.</li>
           <li><b>Safari (macOS 14+):</b> <code>File</code> → <code>Add to Dock</code>.</li>
           <li><b>iPad / iPhone:</b> Share → <code>Add to Home Screen</code>.</li>
         </ol>
       </div>
     </details>
-    <details>
-      <summary>Change the share link on this device</summary>
-      <div class="body">
-        <p style="margin:0 0 10px">Use this only if the FileCloud link changed mid-event and you can't push an update. It affects this browser only.</p>
-        <input type="url" id="overrideUrl" placeholder="https://harvestkc.filecloudonline.com/url/…" spellcheck="false">
-        <div class="row">
-          <button class="ghost" id="saveOverride">Save for this device</button>
-          <button class="ghost" id="clearOverride">Reset to default</button>
-        </div>
-      </div>
-    </details>
+  </div>
+
+  <div class="card who" id="whoCard" hidden>
+    <span class="email" id="whoEmail"></span>
+    <button id="signOutBtn">Sign out</button>
   </div>
 
   <footer id="footer"></footer>
 </div>
 
 <script src="config.js"></script>
-<script>
-(function(){
-  var cfg = window.EVENT_CONFIG || {};
-  var LS_URL = "eventFiles.shareUrlOverride";
-  var LS_AUTO = "eventFiles.autoOpen";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  initializeFirestore, getFirestore, persistentLocalCache,
+  persistentMultipleTabManager, doc, getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  function ls(fn, fallback){ try { return fn(); } catch(e) { return fallback; } }
+const cfg = window.EVENT_CONFIG;
+const LS_AUTO = "eventFiles.autoOpen";
+const params = new URLSearchParams(location.search);
 
-  var override = ls(function(){ return localStorage.getItem(LS_URL); }, null);
-  var shareUrl = (override && /^https:\/\//i.test(override)) ? override : cfg.shareUrl;
+const $ = (id) => document.getElementById(id);
+const views = ["viewLoading", "viewSignedOut", "viewAllowed", "viewDenied", "viewError"];
+function show(id) {
+  views.forEach((v) => { $(v).hidden = v !== id; });
+}
+function fail(title, body) {
+  $("errorTitle").textContent = title;
+  $("errorBody").textContent = body;
+  show("viewError");
+}
+function safeLS(fn, fallback) { try { return fn(); } catch (e) { return fallback; } }
 
-  // --- fill in copy -------------------------------------------------
-  if (cfg.eventName) { document.getElementById("eventName").textContent = cfg.eventName;
-                       document.title = cfg.eventName + " — Event Files"; }
-  if (cfg.folderName) document.getElementById("folderName").textContent = cfg.folderName;
-  document.getElementById("footer").innerHTML =
-    (cfg.folderPath ? "FileCloud · " + cfg.folderPath.replace(/&/g,"&amp;").replace(/</g,"&lt;") : "") +
-    (override ? '<br><span style="color:#d09a3c">Using a share link saved on this device.</span>' : "");
+const app = initializeApp(cfg.firebase);
+const auth = getAuth(app);
 
-  var openBtn = document.getElementById("openBtn");
-  openBtn.href = shareUrl;
-
-  // --- auto-open ----------------------------------------------------
-  var params = new URLSearchParams(location.search);
-  var auto = ls(function(){ return localStorage.getItem(LS_AUTO) === "1"; }, false);
-  var autoBox = document.getElementById("autoOpen");
-  autoBox.checked = auto;
-  autoBox.addEventListener("change", function(){
-    ls(function(){ localStorage.setItem(LS_AUTO, autoBox.checked ? "1" : "0"); });
+// Firestore's on-disk cache, for the same reason the Hub has one: venue wifi.
+// Once a machine has read the link it can open this page and still get there
+// with the network down. Falls back to memory rather than refusing to start —
+// private windows and blocked site data cannot open IndexedDB.
+let db;
+try {
+  db = initializeFirestore(app, {
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
   });
+} catch (e) {
+  db = getFirestore(app);
+}
 
-  var timer = null;
-  function go(){ location.href = shareUrl; }
-  if (params.get("go") === "1") {
-    go();
-  } else if (auto && !params.has("stay")) {
-    var banner = document.getElementById("banner");
-    banner.classList.add("on");
-    timer = setTimeout(go, 1600);
-    document.getElementById("cancelAuto").addEventListener("click", function(){
-      clearTimeout(timer);
-      banner.classList.remove("on");
-    });
+// Always ask which Google account, exactly as the Hub does: people have a
+// personal session open, Google picks it silently, and they land on "not on
+// the list" with no idea why.
+const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: "select_account" });
+
+$("signInBtn").addEventListener("click", async () => {
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (err) {
+    if (err && err.code === "auth/popup-blocked") {
+      fail("The sign-in popup was blocked", "Allow popups for this page in the browser's address bar, then try again.");
+    } else if (err && (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request")) {
+      show("viewSignedOut");
+    } else {
+      fail("Sign-in failed", (err && err.code) || String(err));
+    }
+  }
+});
+
+$("signOutBtn").addEventListener("click", () => {
+  safeLS(() => localStorage.setItem(LS_AUTO, "0"));
+  signOut(auth).then(() => location.reload());
+});
+
+let shareUrl = null;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    $("whoCard").hidden = true;
+    show("viewSignedOut");
+    return;
+  }
+  $("whoEmail").textContent = user.email || "";
+  $("whoCard").hidden = false;
+  show("viewLoading");
+
+  let snap;
+  try {
+    snap = await getDoc(doc(db, "eventLinks", cfg.eventId));
+  } catch (err) {
+    if (err && err.code === "permission-denied") {
+      $("deniedEmail").textContent = user.email || "";
+      show("viewDenied");
+    } else if (err && err.code === "unavailable") {
+      fail("No connection", "This machine hasn't loaded the link yet, so there's nothing cached to fall back on. Get online once and it will work offline after that.");
+    } else {
+      fail("Couldn't load the link", (err && err.code) || String(err));
+    }
+    return;
   }
 
-  // --- copy buttons -------------------------------------------------
-  function copy(text, btn, label){
-    var done = function(ok){
-      var old = btn.textContent;
-      btn.textContent = ok ? "Copied" : "Press ⌘C — " + text;
-      setTimeout(function(){ btn.textContent = label; }, ok ? 1400 : 6000);
+  if (!snap.exists()) {
+    fail("No link for this event yet", "eventLinks/" + cfg.eventId + " doesn't exist. Run tools/set-link.py to create it.");
+    return;
+  }
+
+  const data = snap.data();
+  shareUrl = data.shareUrl;
+  if (!shareUrl) {
+    fail("No link for this event yet", "The document exists but has no shareUrl.");
+    return;
+  }
+
+  if (data.eventName) {
+    $("eventName").textContent = data.eventName;
+    document.title = data.eventName + " — Event Files";
+  }
+  if (data.folderName) $("folderName").textContent = data.folderName;
+  if (data.folderPath) $("footer").textContent = "FileCloud · " + data.folderPath;
+
+  $("openBtn").href = shareUrl;
+  show("viewAllowed");
+  maybeAutoOpen();
+});
+
+// ── straight through, for a machine that has been set that way ──────────────
+function maybeAutoOpen() {
+  const go = () => { location.href = shareUrl; };
+  if (params.get("go") === "1") return go();
+
+  const auto = safeLS(() => localStorage.getItem(LS_AUTO) === "1", false);
+  $("autoOpen").checked = auto;
+  if (!auto || params.has("stay")) return;
+
+  const banner = $("banner");
+  banner.classList.add("on");
+  const timer = setTimeout(go, 1600);
+  $("cancelAuto").addEventListener("click", () => {
+    clearTimeout(timer);
+    banner.classList.remove("on");
+  });
+}
+
+$("autoOpen").addEventListener("change", (e) => {
+  safeLS(() => localStorage.setItem(LS_AUTO, e.target.checked ? "1" : "0"));
+});
+
+// ── copy buttons ─────────────────────────────────────────────────────────────
+function wireCopy(btn, get) {
+  const label = btn.textContent;
+  btn.addEventListener("click", () => {
+    const text = get();
+    if (!text) return;
+    const done = (ok) => {
+      btn.textContent = ok ? "Copied" : "Couldn't copy";
+      setTimeout(() => { btn.textContent = label; }, 1400);
     };
     if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(function(){ done(true); }, function(){ done(false); });
-    } else { done(false); }
-  }
-  var pageUrl = location.origin + location.pathname;
-  var cb = document.getElementById("copyBtn");
-  cb.addEventListener("click", function(){ copy(pageUrl, cb, "Copy this page's link"); });
-  var sb = document.getElementById("copyShareBtn");
-  sb.addEventListener("click", function(){ copy(shareUrl, sb, "Copy the FileCloud link"); });
-
-  // --- per-device override -------------------------------------------
-  var input = document.getElementById("overrideUrl");
-  if (override) input.value = override;
-  document.getElementById("saveOverride").addEventListener("click", function(){
-    var v = input.value.trim();
-    if (!/^https:\/\//i.test(v)) { input.focus(); input.select(); return; }
-    ls(function(){ localStorage.setItem(LS_URL, v); });
-    location.reload();
+      navigator.clipboard.writeText(text).then(() => done(true), () => done(false));
+    } else {
+      done(false);
+    }
   });
-  document.getElementById("clearOverride").addEventListener("click", function(){
-    ls(function(){ localStorage.removeItem(LS_URL); });
-    location.reload();
+}
+wireCopy($("copyBtn"), () => location.origin + location.pathname);
+wireCopy($("copyShareBtn"), () => shareUrl);
+
+// ── QR, hidden if qr.svg isn't there ─────────────────────────────────────────
+const qrImg = $("qrImg");
+qrImg.addEventListener("load", () => { $("qrCard").hidden = false; });
+qrImg.addEventListener("error", () => { $("qrCard").hidden = true; });
+
+// ── offline shell ────────────────────────────────────────────────────────────
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
   });
-
-  // --- QR (hidden if qr.svg isn't there) ------------------------------
-  var qrImg = document.getElementById("qrImg");
-  qrImg.addEventListener("load", function(){ document.getElementById("qrCard").hidden = false; });
-  qrImg.addEventListener("error", function(){ document.getElementById("qrCard").hidden = true; });
-
-  // --- offline shell ---------------------------------------------------
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", function(){
-      navigator.serviceWorker.register("sw.js").catch(function(){});
-    });
-  }
-})();
+}
 </script>
 </body>
 </html>
