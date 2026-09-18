@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JAMF 2026 — Event Files</title>
+<meta name="description" content="One link to the shared presentation folder for the event.">
+<meta name="theme-color" content="#0e1116">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+  :root{
+    --bg:#0e1116;
+    --panel:#161a21;
+    --panel-2:#1d222b;
+    --line:#2a313d;
+    --text:#eef2f7;
+    --muted:#9aa5b4;
+    --accent:#4da3ff;
+    --accent-ink:#04121f;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:32px 16px 40px;
+  }
+  .wrap{width:100%;max-width:560px}
+
+  header{text-align:center;margin-bottom:28px}
+  .kicker{
+    font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 8px
+  }
+  h1{font-size:clamp(28px,7vw,40px);line-height:1.1;margin:0 0 6px;letter-spacing:-.02em}
+  .sub{color:var(--muted);margin:0;font-size:15px}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px;
+    margin-bottom:14px;
+  }
+
+  a.open{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    background:var(--accent);color:var(--accent-ink);
+    text-decoration:none;font-weight:650;font-size:19px;
+    padding:20px 24px;border-radius:14px;
+    transition:filter .15s ease, transform .05s ease;
+  }
+  a.open:hover{filter:brightness(1.08)}
+  a.open:active{transform:translateY(1px)}
+  a.open svg{flex:none}
+
+  .hint{color:var(--muted);font-size:13px;text-align:center;margin:14px 0 0}
+
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  button.ghost{
+    flex:1 1 160px;
+    background:var(--panel-2);color:var(--text);
+    border:1px solid var(--line);border-radius:12px;
+    padding:13px 14px;font:inherit;font-size:14px;font-weight:550;
+    cursor:pointer;transition:background .15s ease;
+  }
+  button.ghost:hover{background:#242b36}
+
+  .qr{display:flex;gap:18px;align-items:center}
+  .qr img{
+    width:112px;height:112px;flex:none;
+    background:#fff;border-radius:10px;padding:8px;
+  }
+  .qr p{margin:0;color:var(--muted);font-size:14px}
+  .qr strong{color:var(--text);display:block;font-size:15px;margin-bottom:4px;font-weight:600}
+
+  label.toggle{
+    display:flex;align-items:flex-start;gap:12px;cursor:pointer;
+  }
+  label.toggle input{margin:3px 0 0;width:18px;height:18px;accent-color:var(--accent);flex:none}
+  label.toggle span{font-size:14px;color:var(--muted)}
+  label.toggle span b{color:var(--text);display:block;font-weight:600;font-size:15px}
+
+  details{border-top:1px solid var(--line);padding-top:16px;margin-top:16px}
+  details:first-of-type{border-top:0;padding-top:0;margin-top:0}
+  summary{cursor:pointer;font-weight:600;font-size:15px;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"›";display:inline-block;margin-right:8px;color:var(--muted);transition:transform .15s ease}
+  details[open] summary::before{transform:rotate(90deg)}
+  details .body{color:var(--muted);font-size:14px;padding:12px 0 2px}
+  details .body ol{margin:0;padding-left:20px}
+  details .body li{margin-bottom:6px}
+  details .body code{
+    background:var(--panel-2);border:1px solid var(--line);
+    padding:1px 6px;border-radius:6px;font-size:12.5px;
+  }
+
+  input[type=url]{
+    width:100%;background:var(--bg);color:var(--text);
+    border:1px solid var(--line);border-radius:10px;
+    padding:11px 12px;font:inherit;font-size:14px;margin-bottom:10px;
+  }
+
+  footer{
+    color:#68727f;font-size:12px;text-align:center;
+    margin-top:22px;line-height:1.6;word-break:break-word;
+  }
+
+  #banner{
+    position:fixed;inset:0;display:none;
+    background:var(--bg);color:var(--text);
+    align-items:center;justify-content:center;flex-direction:column;gap:16px;
+    text-align:center;padding:24px;z-index:10;
+  }
+  #banner.on{display:flex}
+  #banner p{margin:0;color:var(--muted)}
+  .spinner{
+    width:34px;height:34px;border-radius:50%;
+    border:3px solid var(--line);border-top-color:var(--accent);
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.spinner{animation:none}}
+</style>
+</head>
+<body>
+
+<div id="banner">
+  <div class="spinner"></div>
+  <p>Opening the shared folder…</p>
+  <button class="ghost" id="cancelAuto" style="flex:0 0 auto">Stay on this page</button>
+</div>
+
+<div class="wrap">
+  <header>
+    <p class="kicker" id="kicker">Event Files</p>
+    <h1 id="eventName">JAMF 2026</h1>
+    <p class="sub" id="folderName">Presentation Management</p>
+  </header>
+
+  <div class="card">
+    <a class="open" id="openBtn" href="#">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      </svg>
+      Open the shared folder
+    </a>
+    <p class="hint">Opens FileCloud in this window. Sign-in is not required.</p>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <button class="ghost" id="copyBtn">Copy this page's link</button>
+      <button class="ghost" id="copyShareBtn">Copy the FileCloud link</button>
+    </div>
+  </div>
+
+  <div class="card qr" id="qrCard" hidden>
+    <img id="qrImg" src="qr.svg" alt="QR code linking to this page">
+    <p><strong>Phones and tablets</strong>Scan to land on this same page.</p>
+  </div>
+
+  <div class="card">
+    <label class="toggle">
+      <input type="checkbox" id="autoOpen">
+      <span><b>Skip this page on this machine</b>Next time, go straight to the folder. You get a moment to cancel. Stored per-device — set it on the machines you want it on.</span>
+    </label>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>Install as a desktop app</summary>
+      <div class="body">
+        <ol>
+          <li><b>Chrome / Edge:</b> open this page → the install icon at the right of the address bar (or menu → <code>Cast, save and share</code> → <code>Install page as app</code>) → <b>Install</b>. You get a dock/taskbar icon that opens in its own window.</li>
+          <li><b>Safari (macOS 14+):</b> <code>File</code> → <code>Add to Dock</code>.</li>
+          <li><b>iPad / iPhone:</b> Share → <code>Add to Home Screen</code>.</li>
+        </ol>
+      </div>
+    </details>
+    <details>
+      <summary>Change the share link on this device</summary>
+      <div class="body">
+        <p style="margin:0 0 10px">Use this only if the FileCloud link changed mid-event and you can't push an update. It affects this browser only.</p>
+        <input type="url" id="overrideUrl" placeholder="https://harvestkc.filecloudonline.com/url/…" spellcheck="false">
+        <div class="row">
+          <button class="ghost" id="saveOverride">Save for this device</button>
+          <button class="ghost" id="clearOverride">Reset to default</button>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <footer id="footer"></footer>
+</div>
+
+<script src="config.js"></script>
+<script>
+(function(){
+  var cfg = window.EVENT_CONFIG || {};
+  var LS_URL = "eventFiles.shareUrlOverride";
+  var LS_AUTO = "eventFiles.autoOpen";
+
+  function ls(fn, fallback){ try { return fn(); } catch(e) { return fallback; } }
+
+  var override = ls(function(){ return localStorage.getItem(LS_URL); }, null);
+  var shareUrl = (override && /^https:\/\//i.test(override)) ? override : cfg.shareUrl;
+
+  // --- fill in copy -------------------------------------------------
+  if (cfg.eventName) { document.getElementById("eventName").textContent = cfg.eventName;
+                       document.title = cfg.eventName + " — Event Files"; }
+  if (cfg.folderName) document.getElementById("folderName").textContent = cfg.folderName;
+  document.getElementById("footer").innerHTML =
+    (cfg.folderPath ? "FileCloud · " + cfg.folderPath.replace(/&/g,"&amp;").replace(/</g,"&lt;") : "") +
+    (override ? '<br><span style="color:#d09a3c">Using a share link saved on this device.</span>' : "");
+
+  var openBtn = document.getElementById("openBtn");
+  openBtn.href = shareUrl;
+
+  // --- auto-open ----------------------------------------------------
+  var params = new URLSearchParams(location.search);
+  var auto = ls(function(){ return localStorage.getItem(LS_AUTO) === "1"; }, false);
+  var autoBox = document.getElementById("autoOpen");
+  autoBox.checked = auto;
+  autoBox.addEventListener("change", function(){
+    ls(function(){ localStorage.setItem(LS_AUTO, autoBox.checked ? "1" : "0"); });
+  });
+
+  var timer = null;
+  function go(){ location.href = shareUrl; }
+  if (params.get("go") === "1") {
+    go();
+  } else if (auto && !params.has("stay")) {
+    var banner = document.getElementById("banner");
+    banner.classList.add("on");
+    timer = setTimeout(go, 1600);
+    document.getElementById("cancelAuto").addEventListener("click", function(){
+      clearTimeout(timer);
+      banner.classList.remove("on");
+    });
+  }
+
+  // --- copy buttons -------------------------------------------------
+  function copy(text, btn, label){
+    var done = function(ok){
+      var old = btn.textContent;
+      btn.textContent = ok ? "Copied" : "Press ⌘C — " + text;
+      setTimeout(function(){ btn.textContent = label; }, ok ? 1400 : 6000);
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function(){ done(true); }, function(){ done(false); });
+    } else { done(false); }
+  }
+  var pageUrl = location.origin + location.pathname;
+  var cb = document.getElementById("copyBtn");
+  cb.addEventListener("click", function(){ copy(pageUrl, cb, "Copy this page's link"); });
+  var sb = document.getElementById("copyShareBtn");
+  sb.addEventListener("click", function(){ copy(shareUrl, sb, "Copy the FileCloud link"); });
+
+  // --- per-device override -------------------------------------------
+  var input = document.getElementById("overrideUrl");
+  if (override) input.value = override;
+  document.getElementById("saveOverride").addEventListener("click", function(){
+    var v = input.value.trim();
+    if (!/^https:\/\//i.test(v)) { input.focus(); input.select(); return; }
+    ls(function(){ localStorage.setItem(LS_URL, v); });
+    location.reload();
+  });
+  document.getElementById("clearOverride").addEventListener("click", function(){
+    ls(function(){ localStorage.removeItem(LS_URL); });
+    location.reload();
+  });
+
+  // --- QR (hidden if qr.svg isn't there) ------------------------------
+  var qrImg = document.getElementById("qrImg");
+  qrImg.addEventListener("load", function(){ document.getElementById("qrCard").hidden = false; });
+  qrImg.addEventListener("error", function(){ document.getElementById("qrCard").hidden = true; });
+
+  // --- offline shell ---------------------------------------------------
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js").catch(function(){});
+    });
+  }
+})();
+</script>
+</body>
+</html>
