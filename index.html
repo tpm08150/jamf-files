@@ -65,6 +65,25 @@
   .btn svg{flex:none}
 
   .hint{color:var(--muted);font-size:13px;text-align:center;margin:14px 0 0}
+
+  .gatekeeper{
+    margin-top:16px;padding:14px 16px;
+    background:rgba(208,154,60,.08);
+    border:1px solid rgba(208,154,60,.35);
+    border-radius:12px;
+    font-size:13.5px;line-height:1.55;color:var(--muted);
+  }
+  .gatekeeper p{margin:0 0 8px}
+  .gatekeeper p:last-child{margin:0}
+  .gatekeeper-title{color:var(--warn);font-weight:650}
+  .gatekeeper ol{margin:0 0 8px;padding-left:20px}
+  .gatekeeper li{margin-bottom:5px}
+  .gatekeeper code{
+    background:var(--panel-2);border:1px solid var(--line);
+    padding:1px 5px;border-radius:5px;font-size:12px;
+    overflow-wrap:anywhere;
+  }
+  .gatekeeper b{color:var(--text)}
   .hint.warn{color:var(--warn)}
 
   .row{display:flex;gap:10px;flex-wrap:wrap}
@@ -188,18 +207,19 @@
         Download the Mac app
       </a>
       <p class="hint">Keeps a folder on this machine matching the event's, and tells you when a file changes. Apple Silicon Macs.</p>
-      <details>
-        <summary>First launch on a machine that downloaded it</summary>
-        <div class="body">
-          <p style="margin:0 0 10px">macOS quarantines anything that arrives by download, and this app is not signed with a paid Apple certificate — so the first launch needs one extra step, once per machine:</p>
-          <ol>
-            <li>Unzip it and drag <b>Event Files</b> to <code>Applications</code>.</li>
-            <li>Open it. macOS refuses.</li>
-            <li><code>System Settings</code> → <code>Privacy &amp; Security</code> → scroll down → <b>Open Anyway</b>.</li>
-          </ol>
-          <p style="margin:10px 0 0">A copy handed over on a <b>flash drive</b> skips all of that — it just opens.</p>
-        </div>
-      </details>
+
+      <!-- ⚠️ NOT collapsed. This was behind a disclosure triangle and Tyler met
+           the Gatekeeper dialog without having read it — which is the one thing
+           on this card somebody needs BEFORE they click, not after. -->
+      <div class="gatekeeper">
+        <p class="gatekeeper-title">⚠️ macOS will refuse it the first time</p>
+        <p>A downloaded app is quarantined, and this one is not signed with a paid Apple certificate — so you get <i>“Apple could not verify Event Files is free of malware”</i>. <b>Do not press Move to Trash.</b> Press <b>Done</b>, then either:</p>
+        <ol>
+          <li><code>System Settings</code> → <code>Privacy &amp; Security</code> → scroll down → <b>Open Anyway</b>, or</li>
+          <li>in Terminal: <code>xattr -dr com.apple.quarantine /Applications/"Event Files.app"</code></li>
+        </ol>
+        <p>Once per machine. <b>A copy handed over on a flash drive skips all of it</b> — quarantine comes from the browser, so a USB copy just opens.</p>
+      </div>
     </div>
 
     <div class="card">
