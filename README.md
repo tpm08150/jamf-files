@@ -1,50 +1,79 @@
-# Event Files
+# Event Files — the web page
 
-A one-page launcher for an event's FileCloud share folder, behind the same
-Google sign-in the Hub uses, so every machine at the event has one easy URL
-(and can install it as a desktop app).
+One easy link to an event's FileCloud shared folder, behind the same Google
+sign-in the Harvest Hub uses, and the place people download the Mac app from.
 
 **Live:** https://tpm08150.github.io/jamf-files/
 
-## How the security actually works
+The Mac app that actually keeps machines in sync is a separate, **private** repo
+— `tpm08150/event-files-app` — because it carries credentials this one must not.
+This page is the front door; the app is the thing rooms depend on.
 
-This repo is public and the page is a static file with no server behind it, so
-none of the gating can live here.
+---
 
-- The share URL is in Firestore at `eventLinks/<eventId>` in the
-  `hmx-pm-toolbox` project. **It is not in this repo.**
-- `firestore.rules` lets `isStaff() || isContractor()` read that collection —
-  anyone on the Hub's allowlist, contractors included — and lets nobody write
-  it from a browser.
-- The page signs in with Google, reads the document, and only then has a URL to
-  put on the button.
+## How the security works
 
-So the rule is the boundary and the page is a courtesy layer. Widening that one
-rule publishes the link; there is no second gate.
+⚠️ **This repo is public and the page is a static file with no server**, so none
+of the gating can live here. Everything on the page that matters comes from
+Firestore after sign-in:
 
-What this does **not** do: once an allowed person opens the folder, the FileCloud
-URL is in their address bar, and FileCloud treats anyone holding it as welcome —
-including to upload. If the URL gets forwarded, the sign-in here does nothing
-about it. The control for that is in FileCloud (share password, expiry, or a new
-link), not in this app.
+| In Firestore | Not in this repo |
+|---|---|
+| `eventLinks/<eventId>.shareUrl` | the FileCloud share link |
+| `eventLinks/<eventId>.appUrl` | where to download the Mac app |
 
-## Changing the share link
+`firestore.rules` lets `isStaff() || isContractor()` read that collection —
+anyone on the Hub's allowlist, contractors included — and lets nobody write it
+from a browser. **That rule is the boundary and the page is a courtesy layer.**
+Widen it and the link is public; there is no second gate.
 
-Never in this repo — write it to Firestore:
+⚠️ **What it does not do:** once an allowed person opens the folder, the
+FileCloud URL is in their address bar, and FileCloud welcomes anyone holding it
+— including to upload. A forwarded URL walks straight past this sign-in. The
+control for that lives in FileCloud (share password, expiry, or a new link).
+
+⚠️ **The original share link is still in this repo's first commit** (`f65a90a`),
+from before the sign-in existed. Knowingly kept. Do not read the sign-in as
+protecting a secret that is already out; it protects *discovery*.
+
+---
+
+## Changing what the page shows
+
+Never by editing this repo — write to Firestore:
 
 ```bash
-./tools/set-link.py --url "https://harvestkc.filecloudonline.com/url/..."
+./tools/set-link.py --url "https://harvestkc.filecloudonline.com/url/..."   # the folder
+./tools/set-link.py --name "JNUC" --folder "Presentation Management"        # what it prints
+./tools/set-link.py --app "https://firebasestorage.googleapis.com/..."      # the app download
 ```
 
-It takes effect on every machine at the next page load, no deploy. Run it with
-no flags to print what's stored. `--name`, `--folder` and `--path` change the
-labels the page prints; `--event-id` picks a different event document.
+Run it with no flags to print what is stored. Changes take effect on the next
+page load — no deploy.
 
-## Running it for a different event
+⚠️ `--app` is as sensitive as the share link: the build it points at has the
+link inside it. It lives in the same gated document and the page hands it out
+only to a signed-in, allowlisted account.
 
-1. `./tools/set-link.py --event-id someevent-2027 --url "..." --name "..."`
-2. Change `eventId` in [`config.js`](config.js) to match, and regenerate the QR.
-3. Push.
+---
+
+## One-time setup, and the thing that will catch you
+
+⚠️ **Every hosting domain must be in Firebase → Authentication → Settings →
+Authorized domains.** Without it, Google refuses the popup *before* the account
+picker opens, and the page shows `auth/unauthorized-domain`. It looks like the
+app rejected somebody when in fact it never asked. `tpm08150.github.io` was
+missing for a day for exactly this reason; the page now says so in words rather
+than printing the code.
+
+⚠️ **A downloaded app is quarantined.** The builds are ad-hoc signed, not signed
+with a paid Apple certificate, so macOS says *"Apple could not verify Event
+Files is free of malware"* with **Move to Trash** as the default button. The page
+says this above the download, un-collapsed, because it has to be read *before*
+the click. A copy handed over on a flash drive skips all of it — quarantine comes
+from the browser.
+
+---
 
 ## After changing the rules
 
@@ -53,28 +82,20 @@ published by pasting into the Firebase console. Afterwards:
 
 ```bash
 cd ~/dev/firebase-rules && ./rules.py check
-```
-
-then, from this repo, ask Firestore for the link with no credentials at all and
-confirm it refuses:
-
-```bash
 ./tools/attack-link-rule.py
 ```
 
-⚠️ That script is only meaningful **after** publishing. Against a ruleset with
-no `eventLinks` block every refusal check passes too, because Firestore's
-default is deny — which reads as "airtight" rather than "not there". Its last
-check is an admin read that proves the document exists to be leaked.
+The probe asks Firestore for the link with **no credentials at all** and
+confirms it refuses. ⚠️ It is only meaningful *after* publishing: against a
+ruleset with no `eventLinks` block every refusal passes too, because Firestore's
+default is deny. Its last check is an admin read proving the document exists to
+be leaked.
 
-## Firebase console, once per hosting domain
-
-**Authentication → Settings → Authorized domains** must contain
-`tpm08150.github.io`, or the sign-in popup is rejected.
+---
 
 ## Regenerating the QR code
 
-The QR points at this page, not at FileCloud, so it survives a link change:
+It points at this page, not at FileCloud, so it survives a link change:
 
 ```bash
 npx qrcode -t svg -e M -o qr.svg "https://tpm08150.github.io/jamf-files/" < /dev/null
@@ -82,11 +103,14 @@ npx qrcode -t svg -e M -o qr.svg "https://tpm08150.github.io/jamf-files/" < /dev
 
 (The `< /dev/null` matters — the CLI otherwise waits on stdin and looks hung.)
 
+---
+
 ## Notes
 
 - FileCloud sends `X-Frame-Options: SAMEORIGIN`, so the folder cannot be
-  embedded in an iframe. The page navigates to it instead.
-- `?go=1` skips the page and redirects as soon as the link loads.
-  `?stay=1` overrides a machine's saved "skip this page" setting.
-- Firestore's on-disk cache is on, so a machine that has loaded the link once
-  can still get to the folder with the page offline.
+  embedded. The page navigates to it.
+- `?go=1` skips the page and redirects once the link loads; `?stay=1` overrides
+  a machine's saved "skip this page" setting.
+- The page is a PWA — installable from Chrome, Edge or Safari's *Add to Dock* —
+  and its service worker is network-first, so a pushed change is picked up
+  rather than served stale from cache.
